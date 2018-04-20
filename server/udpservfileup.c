@@ -83,7 +83,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 	const char *s1="1";
 	const char *s2="2\n";
 	char s3[1000]="resent.";
-	char file_name_up[256]="servreceived.txt";
+	char file_name_up[256];
 	//const char *s4="udpserv1.c";
 	int n;
 	socklen_t len;
@@ -147,6 +147,9 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 		}
 		else if(*mesg=='3'){
 			//printf("intter 3\n");
+			for(int i=1;mesg[i]!='\n';i++){
+				file_name_up[i-1]=mesg[i];
+			}
 			FILE *fp1=fopen(file_name_up,"w");
 			if(fp1==NULL){
 				printf("file can not open\n");

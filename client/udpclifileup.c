@@ -49,7 +49,7 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 	const char *s3="resent.";
 	char buffer[MAXLINE+1];
 	char filebuffer[8000];
-	char file_name[256]="clireceived.txt";
+	char file_name[256];
 	printf("========================GUIDE========================\n");
 	printf("| 1:get service menu                                |\n");
 	printf("| 2xxx.x:download a file from service  eg.2text.txt |\n");
@@ -91,7 +91,13 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 			}		
 		}
 		else{
+			if(*sendline=='2'){
+				for(int i=1;sendline[i]!='\n';i++){
+				file_name[i-1]=sendline[i];
+				}
+			}
 			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+			//if(sendline=)
 		}
 		while(n = recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL)){
 			//printf("%d\n",n);
