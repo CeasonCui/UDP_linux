@@ -43,14 +43,15 @@ void
 dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 {
 	int  n;
-	char sendline[MAXLINE], recvline[MAXLINE + 1], recvline2[MAXLINE + 1],recvline3[MAXLINE + 1];
+	char sendline[MAXLINE], recvline[MAXLINE + 1], sendline_n[MAXLINE + 1],recvline_n[MAXLINE + 1];
 	const char *s="1\n";
 	const char *s2="2\n";
 	const char *s3="resent.";
 	char buffer[MAXLINE+1];
 	char filebuffer[8000];
 	char file_name[256];
-	char errormessage[10]="error";
+	char errormessage[10]="error\n";
+	char successmesg[20]="successful\n";
 	printf("========================GUIDE========================\n");
 	printf("| 1:get service menu                                |\n");
 	printf("| 2xxx.x:download a file from service  eg.2text.txt |\n");
@@ -61,6 +62,9 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 	while (fgets(sendline, MAXLINE,fp) != NULL) {
 		//sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
 		//printf("sent");
+		/*for(int i=0;sendline[i]!='\n';i++){
+			sendline_n[i]=sendline[i];
+		}*/
 		if(*sendline=='3'){
 			char file_name_up[256];
 			bzero(file_name_up,256);
@@ -77,38 +81,43 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 				sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
 				bzero(filebuffer,0);
 				int length=0;
-				while((length = fread(filebuffer,sizeof(char),8000,fp1))>0){
+				if((length = fread(filebuffer,sizeof(char),8000,fp1))>0){
 						//printf("length=%d\n",length);
 						
 					if(sendto(sockfd,filebuffer,length, 0, pservaddr, servlen)<0){
 						printf("Send File:%s Failed.\n",file_name_up);
-						break;
+						//break;
 					}
 					fputs(filebuffer, stdout);
 					bzero(filebuffer,8000);
+					//break;
 				}
 				fclose(fp1);
 				printf("File:%s Transfer Successful!\n",file_name_up);
 			}		
 		}
-	else{
-		if(*sendline=='2'){
+		else if(*sendline=='2'){
 			for(int i=1;sendline[i]!='\n';i++){
 				file_name[i-1]=sendline[i];
 			}
+			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
 		}
-		sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
-	}
+		else{
+			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+		}
 			//if(sendline=)
 	
 		while(n = recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL)){
 			//printf("%d\n",n);
 			//printf("%s\n",recvline);
+			if(strcmp(recvline,successmesg)==0){
+				break;
+			}
 			if(strcmp(recvline,errormessage)==0){
 				printf("FILE:%s Not Found\n",file_name);
-				recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL);
 				//recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL);
-				fputs(buffer, stdout);
+				//recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL);
+				//fputs(buffer, stdout);
 				break;
 			}
 			else if(strcmp(recvline,s3)==0){
@@ -119,20 +128,17 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 				}
 				bzero(buffer,MAXLINE+1);
 				int length=0;
-				while(length = recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL)){
+				if(length = recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL)){
 					printf("length=%d\n",length);
-					if(length<=20){
-						break;
-					}
 					if(fwrite(buffer,sizeof(char),length,fp)<length){
 						printf("file write faile\n");
-						break;
+						//break;
 					}
 					fputs(buffer, stdout);
 					bzero(buffer,MAXLINE+1);
-					fputs(buffer,stdout);
+					//fputs(buffer,stdout);
 					recvline[n] = 0; 
-					
+					//break;
 				}
 				printf("receive file successful\n");
 				fclose(fp);
@@ -140,9 +146,7 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 			recvline[n] = 0; /* null terminate */
 			fputs(recvline, stdout);
 			printf("\n");
-			if(n <100)
-				break;
-			
+
 		}
 	}
 }

@@ -75,6 +75,7 @@ int readFileList(char *basePath,SA *pcliaddr,socklen_t clilen){
 	return 1;
 }
 
+
 void 
 dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 {
@@ -84,7 +85,8 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 	const char *s2="2\n";
 	char s3[1000]="resent.";
 	char file_name_up[256];
-	char errormessage[10]="error";
+	char errormessage[10]="error\n";
+	char successmesg[20]="successful\n";
 	//const char *s4="udpserv1.c";
 	int n;
 	socklen_t len;
@@ -117,6 +119,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 		if(strcmp(mesg_n,s1)==0){
 			printf("in");
 			readFileList(buffer,pcliaddr,clilen);
+			sendto(sockfd, successmesg, sizeof(successmesg), 0, pcliaddr, len);
 		}
 		else if(*mesg=='2'){
 			char file_name[256];
@@ -131,17 +134,19 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 			if(fp==NULL){
 				printf("FILE:%s Not Found\n",file_name);
 				sendto(sockfd, errormessage, sizeof(errormessage), 0, pcliaddr, len);
+				continue;
 			}
 			else{
 				sendto(sockfd, s3, n, 0, pcliaddr, len);
 				bzero(filebuffer,0);
 				int length=0;
-				while((length = fread(filebuffer,sizeof(char),8000,fp))>0){
+				if((length = fread(filebuffer,sizeof(char),8000,fp))>0){
 					printf("length=%d\n",length);
 					if(sendto(sockfd,filebuffer,length, 0, pcliaddr, len)<0){
 						printf("Send File:%s Failed.\n",file_name);
 						break;
 					}
+					sendto(sockfd, successmesg, sizeof(successmesg), 0, pcliaddr, len);
 					bzero(filebuffer,8000);
 				}
 				fclose(fp);
@@ -157,6 +162,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 			FILE *fp1=fopen(file_name_up,"w");
 			if(fp1==NULL){
 				printf("file can not open\n");
+				sendto(sockfd, errormessage, sizeof(errormessage), 0, pcliaddr, len);
 				exit(1);
 			}
 			bzero(fileupbuffer,MAXLINE+1);
@@ -169,19 +175,25 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 				printf("%d\n",lengthup);
 				if(fwrite(fileupbuffer,sizeof(char),lengthup,fp1)<lengthup){
 					printf("file write faile\n");
+					sendto(sockfd, errormessage, sizeof(errormessage), 0, pcliaddr, len);
 					break;
 				}
 				fputs(fileupbuffer, stdout);
 				bzero(fileupbuffer,MAXLINE+1);
+				//break;
 				//fputs(fileupbuffer,stdout);
 				//mesg[lengthup] = 0; 
 					
 			//}
 			printf("receive file successful\n");
 			fclose(fp1);
+			sendto(sockfd, successmesg, sizeof(successmesg), 0, pcliaddr, len);
 		}
-		printf("recv\n");
-		sendto(sockfd, mesg, n, 0, pcliaddr, len);
+		//printf("recv\n");
+		else{
+			sendto(sockfd, mesg, n, 0, pcliaddr, len);
+			sendto(sockfd, successmesg, sizeof(successmesg), 0, pcliaddr, len);
+		}
 		printf("recv2\n");
 	}
 }
