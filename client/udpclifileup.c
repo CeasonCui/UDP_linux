@@ -103,7 +103,13 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
 		}
 		else{
+			if(*sendline=='2'){
+				for(int i=1;sendline[i]!='\n';i++){
+				file_name[i-1]=sendline[i];
+				}
+			}
 			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+			//if(sendline=)
 		}
 			//if(sendline=)
 	
