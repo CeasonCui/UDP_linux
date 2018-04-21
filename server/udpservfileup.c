@@ -84,6 +84,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 	const char *s2="2\n";
 	char s3[1000]="resent.";
 	char file_name_up[256];
+	char errormessage[10]="error";
 	//const char *s4="udpserv1.c";
 	int n;
 	socklen_t len;
@@ -120,7 +121,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 		else if(*mesg=='2'){
 			char file_name[256];
 			bzero(file_name,256);
-			sendto(sockfd, s3, n, 0, pcliaddr, len);
+			//sendto(sockfd, s3, n, 0, pcliaddr, len);
 			
 			for(int i=1;mesg[i]!='\n';i++){
 				file_name[i-1]=mesg[i];
@@ -129,8 +130,10 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 			FILE*fp = fopen(file_name,"r");
 			if(fp==NULL){
 				printf("FILE:%s Not Found\n",file_name);
+				sendto(sockfd, errormessage, sizeof(errormessage), 0, pcliaddr, len);
 			}
 			else{
+				sendto(sockfd, s3, n, 0, pcliaddr, len);
 				bzero(filebuffer,0);
 				int length=0;
 				while((length = fread(filebuffer,sizeof(char),8000,fp))>0){
@@ -143,7 +146,8 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 				}
 				fclose(fp);
 				printf("File:%s Transfer Successful!\n",file_name);
-			}			
+			}
+			//sendto(sockfd, mesg, n, 0, pcliaddr, len);			
 		}
 		else if(*mesg=='3'){
 			//printf("intter 3\n");

@@ -50,6 +50,7 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 	char buffer[MAXLINE+1];
 	char filebuffer[8000];
 	char file_name[256];
+	char errormessage[10]="error";
 	printf("========================GUIDE========================\n");
 	printf("| 1:get service menu                                |\n");
 	printf("| 2xxx.x:download a file from service  eg.2text.txt |\n");
@@ -90,19 +91,27 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 				printf("File:%s Transfer Successful!\n",file_name_up);
 			}		
 		}
-		else{
-			if(*sendline=='2'){
-				for(int i=1;sendline[i]!='\n';i++){
+	else{
+		if(*sendline=='2'){
+			for(int i=1;sendline[i]!='\n';i++){
 				file_name[i-1]=sendline[i];
-				}
 			}
-			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
-			//if(sendline=)
 		}
+		sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
+	}
+			//if(sendline=)
+	
 		while(n = recvfrom(sockfd, recvline, MAXLINE, 0, NULL, NULL)){
 			//printf("%d\n",n);
 			//printf("%s\n",recvline);
-			if(strcmp(recvline,s3)==0){
+			if(strcmp(recvline,errormessage)==0){
+				printf("FILE:%s Not Found\n",file_name);
+				recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL);
+				//recvfrom(sockfd, buffer, MAXLINE, 0, NULL, NULL);
+				fputs(buffer, stdout);
+				break;
+			}
+			else if(strcmp(recvline,s3)==0){
 				FILE *fp=fopen(file_name,"w");
 				if(fp==NULL){
 					printf("file can not open\n");
@@ -135,7 +144,6 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 				break;
 			
 		}
-		
 	}
 }
  
