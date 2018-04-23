@@ -53,6 +53,13 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 	char errormessage[10]="error\n";
 	char successmesg[20]="successful\n";
 	
+	printf("--MENU--\n");
+    printf("1.list\n");
+    printf("2.download file. eg: down:text.txt\n");
+    printf("3.up file. eg: up:text.txt\n");
+    printf("4.else echo\n");
+    printf("--------\n");
+
 	while (fgets(sendline, MAXLINE,fp) != NULL) {
 		
 		if(sendline[0]=='u'&&sendline[1]=='p'&&sendline[2]==':'){
