@@ -81,7 +81,7 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 {
 	DIR *dir;
 	char basePath[1000];
-	const char *s1="1";
+	const char *s1="list";
 	const char *s2="2\n";
 	char s3[1000]="resent.";
 	char file_name_up[256];
@@ -121,13 +121,13 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 			readFileList(buffer,pcliaddr,clilen);
 			sendto(sockfd, successmesg, sizeof(successmesg), 0, pcliaddr, len);
 		}
-		else if(*mesg=='2'){
+		else if(mesg[0]=='d'&&mesg[1]=='o'&&mesg[2]=='w'&&mesg[3]=='n'&&mesg[4]==':'){
 			char file_name[256];
 			bzero(file_name,256);
 			//sendto(sockfd, s3, n, 0, pcliaddr, len);
 			
-			for(int i=1;mesg[i]!='\n';i++){
-				file_name[i-1]=mesg[i];
+			for(int i=5;mesg[i]!='\n';i++){
+				file_name[i-5]=mesg[i];
 			}
 			printf("change to %s\n",file_name);
 			FILE*fp = fopen(file_name,"r");
@@ -154,10 +154,10 @@ dg_echo(int sockfd, SA *pcliaddr, socklen_t clilen)
 			}
 			//sendto(sockfd, mesg, n, 0, pcliaddr, len);			
 		}
-		else if(*mesg=='3'){
+		else if(mesg[0]=='u'&&mesg[1]=='p'&&mesg[2]==':'){
 			//printf("intter 3\n");
-			for(int i=1;mesg[i]!='\n';i++){
-				file_name_up[i-1]=mesg[i];
+			for(int i=3;mesg[i]!='\n';i++){
+				file_name_up[i-3]=mesg[i];
 			}
 			FILE *fp1=fopen(file_name_up,"w");
 			if(fp1==NULL){

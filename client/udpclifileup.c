@@ -52,24 +52,14 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 	char file_name[256];
 	char errormessage[10]="error\n";
 	char successmesg[20]="successful\n";
-	printf("========================GUIDE========================\n");
-	printf("| 1:get service menu                                |\n");
-	printf("| 2xxx.x:download a file from service  eg.2text.txt |\n");
-	printf("| 3xxx.x:up a file from client  eg.3text.txt        |\n");
-	printf("| enter any except 1,2,3                            |\n");
-	printf("=====================================================\n");
-	printf("\n");
+	
 	while (fgets(sendline, MAXLINE,fp) != NULL) {
-		//sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
-		//printf("sent");
-		/*for(int i=0;sendline[i]!='\n';i++){
-			sendline_n[i]=sendline[i];
-		}*/
-		if(*sendline=='3'){
+		
+		if(sendline[0]=='u'&&sendline[1]=='p'&&sendline[2]==':'){
 			char file_name_up[256];
 			bzero(file_name_up,256);
-			for(int i=1;sendline[i]!='\n';i++){
-				file_name_up[i-1]=sendline[i];
+			for(int i=3;sendline[i]!='\n';i++){
+				file_name_up[i-3]=sendline[i];
 			}
 			printf("filename:%s\n",file_name_up);
 			FILE *fp1=fopen(file_name_up,"r");
@@ -96,20 +86,14 @@ dg_cli(FILE *fp, int sockfd, const SA *pservaddr, socklen_t servlen)
 				printf("File:%s Transfer Successful!\n",file_name_up);
 			}		
 		}
-		else if(*sendline=='2'){
-			for(int i=1;sendline[i]!='\n';i++){
-				file_name[i-1]=sendline[i];
+		else if(sendline[0]=='d'&&sendline[1]=='o'&&sendline[2]=='w'&&sendline[3]=='n'&&sendline[4]==':'){
+			for(int i=5;sendline[i]!='\n';i++){
+				file_name[i-5]=sendline[i];
 			}
 			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
 		}
 		else{
-			if(*sendline=='2'){
-				for(int i=1;sendline[i]!='\n';i++){
-				file_name[i-1]=sendline[i];
-				}
-			}
 			sendto(sockfd, sendline, strlen(sendline), 0, pservaddr, servlen);
-			//if(sendline=)
 		}
 			//if(sendline=)
 	
